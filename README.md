@@ -34,6 +34,16 @@ Graph validation for the local run:
 
 The important finding is that Graph RAG did not help in this configuration. The graph itself validated cleanly, but the entity-overlap policy matched the generic entity `IFRS 17` too often, so graph retrieval became a broad expansion step and displaced more precise BM25/Dense chunks.
 
+## Supplemental study: Graph RAG suitability
+
+This repo also includes a controlled supplemental study on when Graph RAG is useful:
+
+- Report: `docs/graph_rag_suitability_report.md`
+- Reproducible script: `evals/graph_suitability/run_graph_suitability_experiment.py`
+- Summary JSON: `evals/graph_suitability/results/graph-suitability-20260704-summary.json`
+
+The short result: Graph RAG is most useful when the data has stable entities and relationships and questions need multi-hop evidence. It is not a default upgrade for flat FAQ-style knowledge bases, and it can hurt retrieval when broad hub entities are allowed to dominate graph expansion.
+
 ## Reproduce
 
 ```bash
@@ -62,6 +72,7 @@ Outputs are written to `evals/ifrs17_retrieval/runs/`, which is ignored by git b
 ```text
 rag_demo/                         RAG pipeline code
 evals/ifrs17_retrieval/           IFRS 17 benchmark builder, runner, questions
+evals/graph_suitability/          Supplemental Graph RAG suitability experiment
 profiles/ifrs17/                  IFRS 17 profile config, aliases, graph, manifest
 scripts/download_ifrs17_sources.sh Local PDF download helper
 docs/                             Short result notes

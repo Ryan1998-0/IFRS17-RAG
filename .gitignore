@@ -18,5 +18,6 @@ profiles/ifrs17/index/*
 
 # Retrieval runs may include copyrighted content previews from local documents.
 evals/ifrs17_retrieval/runs/
+evals/graph_suitability/runs/
 
 *.npy
