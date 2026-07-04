@@ -1,0 +1,4 @@
+numpy
+qdrant-client
+sentence-transformers
+pypdf

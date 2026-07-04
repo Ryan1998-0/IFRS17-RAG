@@ -1,0 +1,51 @@
+{
+  "run_id": "full-ifrs17-20260704",
+  "benchmark": "IFRS 17 Mixed100",
+  "scope": "retrieval_only",
+  "candidate_k": 50,
+  "final_context_k": 8,
+  "graph_policy": "entity_overlap",
+  "graph_validation": {
+    "entities": 96,
+    "relations": 25,
+    "support_refs": 125,
+    "missing_support_refs": 0,
+    "relations_with_valid_support": 25,
+    "chunk_count": 1190
+  },
+  "variants": [
+    {
+      "name": "BM25-only",
+      "score": "443/500",
+      "accuracy": 0.886,
+      "perfect_questions": "70/100",
+      "avg_total_seconds": 0.2719,
+      "p95_total_seconds": 0.3612
+    },
+    {
+      "name": "BM25 + Dense",
+      "score": "448/500",
+      "accuracy": 0.896,
+      "perfect_questions": "70/100",
+      "avg_total_seconds": 0.3659,
+      "p95_total_seconds": 0.3835
+    },
+    {
+      "name": "BM25 + Dense + Graph",
+      "score": "340/500",
+      "accuracy": 0.68,
+      "perfect_questions": "50/100",
+      "avg_total_seconds": 0.2954,
+      "p95_total_seconds": 0.3776
+    },
+    {
+      "name": "Full project stack",
+      "score": "245/500",
+      "accuracy": 0.49,
+      "perfect_questions": "31/100",
+      "avg_total_seconds": 0.7298,
+      "p95_total_seconds": 1.293
+    }
+  ],
+  "finding": "BM25 + Dense was strongest. The graph was structurally valid but hurt retrieval because the entity-overlap gate matched broad IFRS 17 entities too often."
+}
