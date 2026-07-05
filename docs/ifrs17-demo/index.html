@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IFRS17 Agentic RAG Demo</title>
+    <link rel="stylesheet" href="./assets/styles.css?v=agent-endpoint-1" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">IFRS17 Agentic RAG demo</p>
+          <h1>IFRS17 Evidence Finder</h1>
+          <p class="lede">
+            輸入中文或英文問題，先檢索固定 IFRS17 knowledge base，再可選擇呼叫開源模型
+            Agent API 重新檢索並回答。這個 demo 不產生會計建議，也不呼叫付費 LLM API。
+          </p>
+        </div>
+        <aside class="status-panel" aria-live="polite">
+          <span class="status-label">Data</span>
+          <strong id="dataStatus">Loading IFRS17 profile...</strong>
+          <span id="dataMeta">Static GitHub Pages build</span>
+        </aside>
+      </section>
+
+      <section class="search-panel" aria-label="IFRS17 evidence search">
+        <form id="searchForm" class="search-form">
+          <label for="queryInput">中文 / English question</label>
+          <div class="search-row">
+            <input
+              id="queryInput"
+              name="query"
+              type="search"
+              autocomplete="off"
+              placeholder="IFRS17 的目的是什麼？"
+            />
+            <button type="submit">Retrieve Evidence</button>
+          </div>
+        </form>
+
+        <div class="chips" id="questionChips" aria-label="Suggested IFRS17 questions"></div>
+
+        <div class="agent-controls" aria-label="Live Agent endpoint">
+          <label for="agentEndpointInput">Agent endpoint</label>
+          <div class="agent-row">
+            <input
+              id="agentEndpointInput"
+              type="url"
+              autocomplete="off"
+              placeholder="https://your-agent.example.com/agent/query"
+            />
+            <button type="button" id="saveAgentEndpoint">Save</button>
+            <button type="button" id="askAgentButton">Ask Agent</button>
+          </div>
+        </div>
+
+        <fieldset class="variant-group">
+          <legend>Retrieval variant</legend>
+          <label><input type="radio" name="variant" value="bm25" /> BM25-only</label>
+          <label><input type="radio" name="variant" value="dense" /> BM25 + Alias</label>
+          <label><input type="radio" name="variant" value="bm25_dense" checked /> Hybrid</label>
+          <label><input type="radio" name="variant" value="full" /> Full stack lab</label>
+        </fieldset>
+
+        <p class="note">
+          Scores are retrieval signals only. A high score means the evidence looks relevant; it is
+          not an answer accuracy score.
+        </p>
+      </section>
+
+      <section class="dashboard">
+        <section class="results-column" aria-live="polite">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Top contexts</p>
+              <h2 id="resultTitle">Run a search to inspect IFRS17 evidence</h2>
+            </div>
+            <div class="confidence" id="confidenceBadge">Idle</div>
+          </div>
+          <div class="metrics" id="metrics"></div>
+          <div class="agent-answer-panel" id="agentAnswerPanel"></div>
+          <div class="answer-panel" id="answerPanel"></div>
+          <div class="comparison-panel" id="comparisonPanel" hidden></div>
+          <div class="results" id="results"></div>
+        </section>
+
+        <aside class="side-column">
+          <section class="panel">
+            <p class="eyebrow">Graph sidecar</p>
+            <h2>Concept relations</h2>
+            <p class="panel-copy">
+              Graph matches are exploratory in v1. Primary evidence ranking uses text retrieval
+              unless the Full stack lab variant is selected.
+            </p>
+            <div id="graphPanel"></div>
+          </section>
+
+          <section class="panel">
+            <p class="eyebrow">Pipeline</p>
+            <h2>Selected path</h2>
+            <ol class="pipeline" id="pipeline"></ol>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./assets/app.js?v=agent-endpoint-1"></script>
+  </body>
+</html>

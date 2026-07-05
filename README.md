@@ -34,6 +34,14 @@ Graph validation for the local run:
 
 The important finding is that Graph RAG did not help in this configuration. The graph itself validated cleanly, but the entity-overlap policy matched the generic entity `IFRS 17` too often, so graph retrieval became a broad expansion step and displaced more precise BM25/Dense chunks.
 
+## Interactive demo
+
+Static demo website:
+
+[https://ryan1998-0.github.io/IFRS17-RAG/ifrs17-demo/](https://ryan1998-0.github.io/IFRS17-RAG/ifrs17-demo/)
+
+The demo lets you type Chinese or English IFRS 17 questions, inspect the retrieved evidence chunks, switch retrieval variants, and view the IFRS 4 vs IFRS 17 comparison graph. It runs entirely in the browser from sanitized demo data and does not include the local Agent backend.
+
 ## Supplemental study: Graph RAG suitability
 
 This repo also includes a controlled supplemental study on when Graph RAG is useful:
