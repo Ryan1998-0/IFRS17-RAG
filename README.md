@@ -40,7 +40,7 @@ Static demo website:
 
 [https://ryan1998-0.github.io/IFRS17-RAG/ifrs17-demo/](https://ryan1998-0.github.io/IFRS17-RAG/ifrs17-demo/)
 
-The demo lets you type Chinese or English IFRS 17 questions, inspect the retrieved evidence chunks, switch retrieval variants, and view the IFRS 4 vs IFRS 17 comparison graph. It runs entirely in the browser from sanitized demo data and does not include the local Agent backend.
+The demo lets you type Chinese or English IFRS 17 questions, inspect the retrieved evidence chunks, switch between `BM25-only`, `BM25 + Dense`, `BM25 + Dense + Graph`, and `Full stack lab`, and view the IFRS 4 vs IFRS 17 comparison graph. It runs entirely in the browser from sanitized demo data and does not include the local Agent backend.
 
 ## Supplemental study: Graph RAG suitability
 

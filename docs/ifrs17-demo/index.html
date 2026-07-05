@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>IFRS17 Agentic RAG Demo</title>
-    <link rel="stylesheet" href="./assets/styles.css?v=agent-endpoint-1" />
+    <link rel="stylesheet" href="./assets/styles.css?v=variant-architecture-1" />
   </head>
   <body>
     <main class="shell">
@@ -58,10 +58,11 @@
         <fieldset class="variant-group">
           <legend>Retrieval variant</legend>
           <label><input type="radio" name="variant" value="bm25" /> BM25-only</label>
-          <label><input type="radio" name="variant" value="dense" /> BM25 + Alias</label>
-          <label><input type="radio" name="variant" value="bm25_dense" checked /> Hybrid</label>
+          <label><input type="radio" name="variant" value="bm25_dense" checked /> BM25 + Dense</label>
+          <label><input type="radio" name="variant" value="bm25_dense_graph" /> BM25 + Dense + Graph</label>
           <label><input type="radio" name="variant" value="full" /> Full stack lab</label>
         </fieldset>
+        <div class="variant-details" id="variantDetails"></div>
 
         <p class="note">
           Scores are retrieval signals only. A high score means the evidence looks relevant; it is
@@ -105,6 +106,6 @@
       </section>
     </main>
 
-    <script type="module" src="./assets/app.js?v=agent-endpoint-1"></script>
+    <script type="module" src="./assets/app.js?v=variant-architecture-1"></script>
   </body>
 </html>

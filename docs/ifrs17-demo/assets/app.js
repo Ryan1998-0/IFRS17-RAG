@@ -4,13 +4,13 @@ import {
   expandQueryWithAliases,
   runRetrieval,
   searchGraph,
-} from "../retrieval-core.js";
+} from "../retrieval-core.js?v=variant-architecture-1";
 import {
   buildAgentQueryPayload,
   callAgentEndpoint,
   readAgentEndpoint,
   saveAgentEndpoint,
-} from "../agent-client.js";
+} from "../agent-client.js?v=variant-architecture-1";
 
 const state = {
   data: null,
@@ -29,6 +29,7 @@ const elements = {
   input: document.querySelector("#queryInput"),
   chips: document.querySelector("#questionChips"),
   metrics: document.querySelector("#metrics"),
+  variantDetails: document.querySelector("#variantDetails"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   confidence: document.querySelector("#confidenceBadge"),
@@ -126,6 +127,7 @@ function runSearch(options = {}) {
   const answer = composeChineseRetrievalAnswer(result);
 
   renderMetrics(result, expanded);
+  renderVariantDetails(result.variant);
   renderAgentIdle();
   renderAnswer(answer, result);
   renderComparisonGraph(result.comparisonGraph);
@@ -192,6 +194,20 @@ function renderMetrics(result, expanded) {
     item.innerHTML = `<span>${label}</span><strong>${escapeHtml(String(value))}</strong>`;
     elements.metrics.append(item);
   }
+}
+
+function renderVariantDetails(variant) {
+  const detail = architectureForVariant(variant);
+  elements.variantDetails.innerHTML = `
+    <div>
+      <p class="eyebrow">Architecture</p>
+      <h3>${escapeHtml(detail.label)}</h3>
+    </div>
+    <p>${escapeHtml(detail.summary)}</p>
+    <div class="architecture-steps">
+      ${detail.steps.map((step) => `<span>${escapeHtml(step)}</span>`).join("")}
+    </div>
+  `;
 }
 
 function renderAnswer(answer, result) {
@@ -416,10 +432,51 @@ function sourceFor(sourceId) {
 function labelForVariant(variant) {
   return {
     bm25: "BM25-only",
-    dense: "BM25 + Alias",
-    bm25_dense: "Hybrid",
+    dense: "Dense proxy",
+    bm25_dense: "BM25 + Dense",
+    bm25_dense_graph: "BM25 + Dense + Graph",
     full: "Full stack lab",
   }[variant] || variant;
+}
+
+function architectureForVariant(variant) {
+  const architectures = {
+    bm25: {
+      label: "BM25-only",
+      summary: "Lexical baseline. It ranks chunks by keyword/token overlap with the IFRS17 question.",
+      steps: ["BM25", "Top K evidence"],
+    },
+    bm25_dense: {
+      label: "BM25 + Dense",
+      summary:
+        "Hybrid retrieval. The public static demo uses an alias-expanded dense proxy because no embedding model runs in GitHub Pages.",
+      steps: ["BM25", "Dense proxy / Alias expansion", "RRF Merge", "Top K evidence"],
+    },
+    bm25_dense_graph: {
+      label: "BM25 + Dense + Graph",
+      summary:
+        "Adds graph relation support to the BM25 + Dense candidates, then merges the three retrieval branches.",
+      steps: ["BM25", "Dense proxy / Alias expansion", "Graph Retrieval", "RRF Merge", "Top K evidence"],
+    },
+    full: {
+      label: "Full stack lab",
+      summary:
+        "The complete static lab path. It keeps the IFRS17 profile filter, merges lexical/dense/graph evidence, suppresses broad hub graph matches, and applies evidence quality rules.",
+      steps: [
+        "Translation Agent",
+        "Metadata Filter",
+        "BM25",
+        "Dense proxy / Alias expansion",
+        "Graph Retrieval",
+        "RRF Merge",
+        "Graph Hub Guard",
+        "Evidence Quality Gate",
+        "Comparison Graph when relevant",
+      ],
+    },
+  };
+
+  return architectures[variant] || architectures.full;
 }
 
 function titleCase(value) {

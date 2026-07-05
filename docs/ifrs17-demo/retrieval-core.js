@@ -549,12 +549,35 @@ export function runRetrieval({
       { name: "bm25", results: bm25 },
       { name: "dense", results: dense },
     ]);
+  } else if (variant === "bm25_dense_graph") {
+    pipeline.push({ name: "BM25", detail: "Original question." });
+    pipeline.push({ name: "Dense proxy", detail: "Alias-expanded semantic proxy." });
+    pipeline.push({ name: "Graph Retrieval", detail: "IFRS17 entity relation support chunks." });
+    pipeline.push({ name: "RRF Merge", detail: "Merge lexical, semantic, and graph candidates." });
+    contexts = mergeRankings(
+      [
+        { name: "bm25", results: bm25 },
+        { name: "dense", results: dense },
+        { name: "graph", results: graphResult.results },
+      ],
+      { graph: 1 },
+    );
   } else {
     pipeline.push({ name: "Metadata Filter", detail: "Static demo uses IFRS17 profile only." });
     pipeline.push({ name: "BM25", detail: "Original question." });
     pipeline.push({ name: "Dense proxy", detail: "Alias-expanded semantic proxy." });
     pipeline.push({ name: "Graph Retrieval", detail: "IFRS17 entity relation support chunks." });
     pipeline.push({ name: "RRF Merge", detail: "Merge candidates and deduplicate chunks." });
+    pipeline.push({
+      name: "Graph Hub Guard",
+      detail: graphResult.hubWarning
+        ? "Generic IFRS17 hub matches are downweighted before merge."
+        : "Graph candidates keep normal weight when no generic hub dominates.",
+    });
+    pipeline.push({
+      name: "Evidence Quality Gate",
+      detail: "Contents pages are downranked and direct IFRS17 evidence is favored.",
+    });
     contexts = mergeRankings(
       [
         { name: "bm25", results: bm25 },
