@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IFRS17 RAG Demo</title>
+    <title>IFRS17 RAG Project</title>
     <style>
       :root {
         color-scheme: light;
@@ -19,9 +19,9 @@
 
       main {
         display: grid;
-        gap: 16px;
-        width: min(760px, calc(100% - 32px));
-        margin: 12vh auto;
+        gap: 28px;
+        width: min(960px, calc(100% - 32px));
+        margin: 8vh auto;
       }
 
       h1 {
@@ -37,7 +37,48 @@
         line-height: 1.6;
       }
 
-      a {
+      .eyebrow {
+        color: #146c94;
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .hero {
+        display: grid;
+        gap: 14px;
+      }
+
+      .links {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .link {
+        display: grid;
+        gap: 8px;
+        min-height: 120px;
+        border: 1px solid #d8e0e7;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fff;
+        color: #17202a;
+        text-decoration: none;
+      }
+
+      .link strong {
+        font-size: 1rem;
+      }
+
+      .link span {
+        color: #5c6673;
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .primary {
         display: inline-flex;
         width: fit-content;
         border-radius: 6px;
@@ -47,13 +88,57 @@
         font-weight: 800;
         text-decoration: none;
       }
+
+      .note {
+        color: #697480;
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 760px) {
+        main {
+          margin: 36px auto;
+        }
+
+        .links {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>IFRS17 RAG</h1>
-      <p>Open the static IFRS17 evidence retrieval demo.</p>
-      <a href="./ifrs17-demo/">Open demo</a>
+      <section class="hero">
+        <div class="eyebrow">Retrieval-first Hybrid RAG Lab</div>
+        <h1>IFRS17 RAG</h1>
+        <p>
+          以 IFRS17 專業文件為主軸，整合 Retrieval benchmark、Graph RAG
+          適用性研究，以及三體 RAG 跨資料型態實驗。
+        </p>
+        <a class="primary" href="./ifrs17-demo/">Open demo</a>
+      </section>
+
+      <section class="links" aria-label="Project links">
+        <a
+          class="link"
+          href="https://github.com/Ryan1998-0/IFRS17-RAG/blob/main/README.zh-TW.md"
+        >
+          <strong>中文版專案說明</strong>
+          <span>用中文整理 IFRS17 架構、Graph 研究、三體補充案例與專案價值。</span>
+        </a>
+        <a class="link" href="./project_overview_zh.md">
+          <strong>完整中文展示稿</strong>
+          <span>把 IFRS17、Graph suitability、三體實驗放在同一條研究主線裡。</span>
+        </a>
+        <a class="link" href="./graph_rag_suitability_report.md">
+          <strong>Graph RAG 適用性研究</strong>
+          <span>回答 Graph 適合什麼資料庫，以及什麼情境下反而會傷害檢索。</span>
+        </a>
+      </section>
+
+      <p class="note">
+        Static GitHub Pages demo only. It does not include the local Ollama Agent backend or
+        paid LLM API calls.
+      </p>
     </main>
   </body>
 </html>

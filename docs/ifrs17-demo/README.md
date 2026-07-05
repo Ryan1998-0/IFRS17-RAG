@@ -2,6 +2,11 @@
 
 Static GitHub Pages demo for the IFRS17 profile.
 
+中文專案整理：
+
+- [README.zh-TW.md](../../README.zh-TW.md)
+- [docs/project_overview_zh.md](../project_overview_zh.md)
+
 - No paid LLM API.
 - The static page still works without any backend.
 - Primary ranking uses browser-side lexical retrieval and conservative alias expansion.

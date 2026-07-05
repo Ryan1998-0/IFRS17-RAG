@@ -2,6 +2,10 @@
 
 Retrieval-only RAG benchmark for IFRS 17 materials. The project compares four retrieval stacks on a 100-question mixed benchmark:
 
+中文版專案說明: [README.zh-TW.md](README.zh-TW.md)
+
+完整中文專案整理: [docs/project_overview_zh.md](docs/project_overview_zh.md)
+
 - BM25-only
 - BM25 + Dense
 - BM25 + Dense + Graph
