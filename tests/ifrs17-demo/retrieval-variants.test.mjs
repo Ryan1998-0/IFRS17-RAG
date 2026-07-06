@@ -49,6 +49,9 @@ test("Full stack lab labels every architecture component it applies", () => {
   assert.ok(names.includes("Dense proxy"));
   assert.ok(names.includes("Graph Retrieval"));
   assert.ok(names.includes("RRF Merge"));
+  assert.ok(names.includes("Reranker"));
   assert.ok(names.includes("Graph Hub Guard"));
   assert.ok(names.includes("Evidence Quality Gate"));
+  assert.ok(names.indexOf("RRF Merge") < names.indexOf("Reranker"));
+  assert.ok(names.indexOf("Reranker") < names.indexOf("Graph Hub Guard"));
 });

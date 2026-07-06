@@ -569,6 +569,10 @@ export function runRetrieval({
     pipeline.push({ name: "Graph Retrieval", detail: "IFRS17 entity relation support chunks." });
     pipeline.push({ name: "RRF Merge", detail: "Merge candidates and deduplicate chunks." });
     pipeline.push({
+      name: "Reranker",
+      detail: "Static demo exposes the rerank phase with browser-side scoring heuristics.",
+    });
+    pipeline.push({
       name: "Graph Hub Guard",
       detail: graphResult.hubWarning
         ? "Generic IFRS17 hub matches are downweighted before merge."

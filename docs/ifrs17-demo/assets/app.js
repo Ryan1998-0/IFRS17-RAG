@@ -4,13 +4,13 @@ import {
   expandQueryWithAliases,
   runRetrieval,
   searchGraph,
-} from "../retrieval-core.js?v=variant-architecture-1";
+} from "../retrieval-core.js?v=reranker-node-1";
 import {
   buildAgentQueryPayload,
   callAgentEndpoint,
   readAgentEndpoint,
   saveAgentEndpoint,
-} from "../agent-client.js?v=variant-architecture-1";
+} from "../agent-client.js?v=reranker-node-1";
 
 const state = {
   data: null,
@@ -461,7 +461,7 @@ function architectureForVariant(variant) {
     full: {
       label: "Full stack lab",
       summary:
-        "The complete static lab path. It keeps the IFRS17 profile filter, merges lexical/dense/graph evidence, suppresses broad hub graph matches, and applies evidence quality rules.",
+        "The complete static lab path. It keeps the IFRS17 profile filter, merges lexical/dense/graph evidence, exposes the rerank phase, suppresses broad hub graph matches, and applies evidence quality rules.",
       steps: [
         "Translation Agent",
         "Metadata Filter",
@@ -469,6 +469,7 @@ function architectureForVariant(variant) {
         "Dense proxy / Alias expansion",
         "Graph Retrieval",
         "RRF Merge",
+        "Reranker",
         "Graph Hub Guard",
         "Evidence Quality Gate",
         "Comparison Graph when relevant",

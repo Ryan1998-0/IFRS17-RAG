@@ -23,6 +23,8 @@ BM25 + Dense + Graph Retrieval
 ↓
 RRF Merge
 ↓
+Reranker
+↓
 Graph Hub Guard / Evidence Quality Gate
 ↓
 Top Evidence Chunks
@@ -40,6 +42,7 @@ QA Agent or Browser-side Grounded Answer
 | Dense | 補語意相似與非原文措辭問題。 | BM25 + Dense 提升到 `89.6%`，是本次 IFRS17 最佳結果。 |
 | Graph Retrieval | 用 entity / relation 補關係型或多跳問題。 | IFRS17 因 `IFRS 17` hub entity 太強，Graph 反而下降到 `68.0%`。 |
 | RRF Merge | 合併多個 retrieval branch 的候選。 | merge 權重要測，否則 graph noise 會被放大。 |
+| Reranker | 在 merge 後重新排列候選 evidence。 | 靜態 demo 用 browser-side heuristic reranker 顯示這個階段；本地完整實驗另有 Rerank timing。 |
 | Graph Hub Guard | 壓低泛用 hub entity 造成的噪音。 | IFRS17 demo 中把這個做成 Full stack lab 的明確節點。 |
 | Evidence Quality Gate | 降低目錄頁、封面頁或弱 evidence chunk。 | 專業文件中 evidence quality 比單純相似度更重要。 |
 

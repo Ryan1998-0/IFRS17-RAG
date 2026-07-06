@@ -17,7 +17,7 @@ Demo 可以輸入中文或英文 IFRS17 問題，檢查檢索到的 evidence chu
 | BM25-only | 只用關鍵字與詞頻訊號，適合條文號、專有名詞、精確詞查詢。 |
 | BM25 + Dense | 加入語意相似度分支，補強口語化或與原文措辭不同的問題。 |
 | BM25 + Dense + Graph | 再加入 Graph Retrieval，用 entity/relation 補多跳或關係型問題。 |
-| Full stack lab | Translation Agent、Metadata Filter、BM25、Dense proxy / Alias expansion、Graph Retrieval、RRF Merge、Graph Hub Guard、Evidence Quality Gate、Comparison Graph。 |
+| Full stack lab | Translation Agent、Metadata Filter、BM25、Dense proxy / Alias expansion、Graph Retrieval、RRF Merge、Reranker、Graph Hub Guard、Evidence Quality Gate、Comparison Graph。 |
 
 ## IFRS17 主架構
 
@@ -33,6 +33,8 @@ Metadata Filter
 BM25 + Dense + Graph Retrieval
 ↓
 RRF Merge
+↓
+Reranker
 ↓
 Graph Hub Guard / Evidence Quality Gate
 ↓

@@ -37,4 +37,4 @@ This repository includes only the static browser-side demo. The local Ollama Age
 - `BM25-only`
 - `BM25 + Dense`
 - `BM25 + Dense + Graph`
-- `Full stack lab`: Translation Agent, Metadata Filter, BM25, Dense proxy / Alias expansion, Graph Retrieval, RRF Merge, Graph Hub Guard, Evidence Quality Gate, and Comparison Graph when relevant.
+- `Full stack lab`: Translation Agent, Metadata Filter, BM25, Dense proxy / Alias expansion, Graph Retrieval, RRF Merge, Reranker, Graph Hub Guard, Evidence Quality Gate, and Comparison Graph when relevant.
