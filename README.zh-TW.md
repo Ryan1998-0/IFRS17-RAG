@@ -12,6 +12,8 @@
 
 Demo 可以輸入中文或英文 IFRS17 問題，檢查檢索到的 evidence chunks，並切換四種 retrieval 架構：
 
+Demo 也可以手動選擇 QA Agent LLM，以及選擇 knowledge base profile。公開靜態版目前只有 IFRS17 會在 browser-side 執行檢索；三體作為 Agent profile 傳給後端 endpoint，不把完整小說語料打包進 GitHub Pages。
+
 | 架構 | 說明 |
 | --- | --- |
 | BM25-only | 只用關鍵字與詞頻訊號，適合條文號、專有名詞、精確詞查詢。 |

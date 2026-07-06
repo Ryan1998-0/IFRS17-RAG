@@ -9,8 +9,11 @@ Static GitHub Pages demo for the IFRS17 profile.
 
 - No paid LLM API.
 - The static page still works without any backend.
+- The UI can choose the QA Agent model passed to the endpoint.
+- The UI can choose a knowledge base profile: IFRS17 or 三體.
 - Primary ranking uses browser-side lexical retrieval and conservative alias expansion.
 - Graph results are shown as an exploratory sidecar because the IFRS17 graph benchmark showed hub-entity pollution.
+- IFRS17 supports browser-side static retrieval. 三體 is an Agent profile in this public demo; the full novel corpus is not bundled into GitHub Pages.
 
 Open locally:
 

@@ -2,16 +2,33 @@ const AGENT_QUERY_SCHEMA = "ifrs17-agent-query-v1";
 const AGENT_RESPONSE_SCHEMA = "ifrs17-agent-response-v1";
 const DEFAULT_ENDPOINT_KEY = "ifrs17.agentEndpoint";
 
-export function buildAgentQueryPayload({ question, variant = "bm25_dense", topK = 8 } = {}) {
+export function buildAgentQueryPayload({
+  question,
+  profile = "ifrs17",
+  model = { provider: "ollama", name: "qwen2.5:7b" },
+  variant = "bm25_dense",
+  topK = 8,
+} = {}) {
   const cleanQuestion = String(question || "").trim();
   if (!cleanQuestion) throw new Error("Agent question is required.");
 
   return {
     schema_version: AGENT_QUERY_SCHEMA,
-    profile: "ifrs17",
+    profile: String(profile || "ifrs17"),
+    model: normalizeModel(model),
     question: cleanQuestion,
     variant,
     top_k: Number(topK) || 8,
+  };
+}
+
+function normalizeModel(model) {
+  if (!model || typeof model !== "object") {
+    return { provider: "ollama", name: "qwen2.5:7b" };
+  }
+  return {
+    provider: String(model.provider || "ollama"),
+    name: String(model.name || "qwen2.5:7b"),
   };
 }
 

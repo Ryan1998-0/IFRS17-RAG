@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>IFRS17 Agentic RAG Demo</title>
-    <link rel="stylesheet" href="./assets/styles.css?v=reranker-node-1" />
+    <link rel="stylesheet" href="./assets/styles.css?v=kb-model-select-2" />
   </head>
   <body>
     <main class="shell">
@@ -13,8 +13,8 @@
           <p class="eyebrow">IFRS17 Agentic RAG demo</p>
           <h1>IFRS17 Evidence Finder</h1>
           <p class="lede">
-            輸入中文或英文問題，先檢索固定 IFRS17 knowledge base，再可選擇呼叫開源模型
-            Agent API 重新檢索並回答。這個 demo 不產生會計建議，也不呼叫付費 LLM API。
+            輸入中文或英文問題，選擇 knowledge base 與 QA Agent LLM，再可選擇呼叫開源模型
+            Agent API 重新檢索並回答。公開靜態版不產生會計建議，也不呼叫付費 LLM API。
           </p>
         </div>
         <aside class="status-panel" aria-live="polite">
@@ -25,6 +25,25 @@
       </section>
 
       <section class="search-panel" aria-label="IFRS17 evidence search">
+        <div class="profile-controls" aria-label="Knowledge base and model controls">
+          <div class="control-field">
+            <label for="knowledgeBaseSelect">Knowledge base</label>
+            <select id="knowledgeBaseSelect">
+              <option value="ifrs17">IFRS17</option>
+              <option value="three_body_trilogy">三體</option>
+            </select>
+          </div>
+          <div class="control-field">
+            <label for="qaModelSelect">QA Agent LLM</label>
+            <select id="qaModelSelect">
+              <option value="ollama:qwen2.5:7b">Ollama qwen2.5:7b</option>
+              <option value="ollama:llama3.1:8b">Ollama llama3.1:8b</option>
+              <option value="ollama:mistral:7b">Ollama mistral:7b</option>
+              <option value="backend:default">Backend default</option>
+            </select>
+          </div>
+        </div>
+
         <form id="searchForm" class="search-form">
           <label for="queryInput">中文 / English question</label>
           <div class="search-row">
@@ -65,8 +84,8 @@
         <div class="variant-details" id="variantDetails"></div>
 
         <p class="note">
-          Scores are retrieval signals only. A high score means the evidence looks relevant; it is
-          not an answer accuracy score.
+          IFRS17 supports browser-side retrieval in this public static demo. 三體 is selectable as
+          an Agent profile; the public page does not bundle the full novel corpus.
         </p>
       </section>
 
@@ -106,6 +125,6 @@
       </section>
     </main>
 
-    <script type="module" src="./assets/app.js?v=reranker-node-1"></script>
+    <script type="module" src="./assets/app.js?v=kb-model-select-2"></script>
   </body>
 </html>

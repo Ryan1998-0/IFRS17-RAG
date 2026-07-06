@@ -4,22 +4,64 @@ import {
   expandQueryWithAliases,
   runRetrieval,
   searchGraph,
-} from "../retrieval-core.js?v=reranker-node-1";
+} from "../retrieval-core.js?v=kb-model-select-2";
 import {
   buildAgentQueryPayload,
   callAgentEndpoint,
   readAgentEndpoint,
   saveAgentEndpoint,
-} from "../agent-client.js?v=reranker-node-1";
+} from "../agent-client.js?v=kb-model-select-2";
+
+const knowledgeBases = {
+  ifrs17: {
+    label: "IFRS17",
+    profile: "ifrs17",
+    dataUrl: "./data/ifrs17_demo_data.json",
+    staticRetrieval: true,
+    defaultQuery: "IFRS17 的目的是什麼？",
+    queries: [
+      "IFRS17 的目的是什麼？",
+      "IFRS17 適用哪些合約？",
+      "保險合約在 IFRS17 中怎麼定義？",
+      "合約服務邊際 CSM 代表什麼？",
+      "什麼時候可以使用保費分攤法 PAA？",
+      "持有的再保險合約要怎麼處理？",
+      "舊制 IFRS 4 和新制 IFRS 17 差在哪？",
+    ],
+  },
+  three_body_trilogy: {
+    label: "三體",
+    profile: "three_body_trilogy",
+    staticRetrieval: false,
+    defaultQuery: "葉文潔和紅岸基地是什麼關係？",
+    queries: [
+      "葉文潔和紅岸基地是什麼關係？",
+      "黑暗森林法則是什麼？",
+      "三體人為什麼害怕地球科技爆炸？",
+      "羅輯成為執劍人的原因是什麼？",
+      "智子在故事中扮演什麼角色？",
+    ],
+  },
+};
+
+const qaModels = {
+  "ollama:qwen2.5:7b": { provider: "ollama", name: "qwen2.5:7b", label: "Ollama qwen2.5:7b" },
+  "ollama:llama3.1:8b": { provider: "ollama", name: "llama3.1:8b", label: "Ollama llama3.1:8b" },
+  "ollama:mistral:7b": { provider: "ollama", name: "mistral:7b", label: "Ollama mistral:7b" },
+  "backend:default": { provider: "backend", name: "default", label: "Backend default" },
+};
 
 const state = {
   data: null,
   index: null,
+  profile: "ifrs17",
+  qaModel: "ollama:qwen2.5:7b",
   query: "IFRS17 的目的是什麼？",
   variant: "bm25_dense",
   agentEndpoint: "",
   latestResult: null,
   agentRequestId: 0,
+  pendingProfile: "",
 };
 
 const elements = {
@@ -27,6 +69,8 @@ const elements = {
   dataMeta: document.querySelector("#dataMeta"),
   form: document.querySelector("#searchForm"),
   input: document.querySelector("#queryInput"),
+  knowledgeBase: document.querySelector("#knowledgeBaseSelect"),
+  qaModel: document.querySelector("#qaModelSelect"),
   chips: document.querySelector("#questionChips"),
   metrics: document.querySelector("#metrics"),
   variantDetails: document.querySelector("#variantDetails"),
@@ -43,44 +87,48 @@ const elements = {
   pipeline: document.querySelector("#pipeline"),
 };
 
-const demoQueries = [
-  "IFRS17 的目的是什麼？",
-  "IFRS17 適用哪些合約？",
-  "保險合約在 IFRS17 中怎麼定義？",
-  "合約服務邊際 CSM 代表什麼？",
-  "什麼時候可以使用保費分攤法 PAA？",
-  "持有的再保險合約要怎麼處理？",
-  "舊制 IFRS 4 和新制 IFRS 17 差在哪？",
-];
-
 init();
 
 async function init() {
   bindEvents();
+  elements.knowledgeBase.value = state.profile;
+  elements.qaModel.value = state.qaModel;
   renderChips();
   state.agentEndpoint = readAgentEndpoint();
   elements.agentEndpoint.value = state.agentEndpoint;
   renderAgentIdle();
-  const response = await fetch("./data/ifrs17_demo_data.json");
-  state.data = await response.json();
-  state.index = buildSearchIndex(state.data.chunks);
-  elements.dataStatus.textContent = "IFRS17 profile loaded";
-  elements.dataMeta.textContent = `${state.data.meta.chunk_count} chunks · ${state.data.meta.alias_count} aliases · ${state.data.meta.graph_relation_count} graph relations`;
-  elements.input.value = state.query;
-  runSearch({ askAgent: Boolean(state.agentEndpoint) });
+  await loadKnowledgeBase(state.profile, { askAgent: Boolean(state.agentEndpoint) });
+  startControlWatcher();
 }
 
 function bindEvents() {
   elements.form.addEventListener("submit", (event) => {
     event.preventDefault();
     state.query = elements.input.value.trim();
-    runSearch({ askAgent: true });
+    if (currentKnowledgeBase().staticRetrieval) runSearch({ askAgent: true });
+    else askLiveAgent();
   });
+
+  const handleKnowledgeBaseChange = async () => {
+    await loadKnowledgeBase(elements.knowledgeBase.value);
+  };
+  elements.knowledgeBase.addEventListener("change", handleKnowledgeBaseChange);
+  elements.knowledgeBase.addEventListener("input", handleKnowledgeBaseChange);
+
+  const handleQaModelChange = () => {
+    state.qaModel = elements.qaModel.value;
+    renderAgentIdle();
+    if (currentKnowledgeBase().staticRetrieval) runSearch();
+    else renderAgentOnlyProfile();
+  };
+  elements.qaModel.addEventListener("change", handleQaModelChange);
+  elements.qaModel.addEventListener("input", handleQaModelChange);
 
   document.querySelectorAll("input[name='variant']").forEach((input) => {
     input.addEventListener("change", () => {
       state.variant = input.value;
-      runSearch();
+      if (currentKnowledgeBase().staticRetrieval) runSearch();
+      else renderAgentOnlyProfile();
     });
   });
 
@@ -90,23 +138,135 @@ function bindEvents() {
   });
 
   elements.askAgent.addEventListener("click", () => {
-    if (state.latestResult) askLiveAgent(state.latestResult);
+    askLiveAgent(state.latestResult);
   });
 }
 
 function renderChips() {
   elements.chips.innerHTML = "";
-  for (const query of demoQueries) {
+  for (const query of currentKnowledgeBase().queries) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = query;
     button.addEventListener("click", () => {
       state.query = query;
       elements.input.value = query;
-      runSearch({ askAgent: Boolean(state.agentEndpoint) });
+      if (currentKnowledgeBase().staticRetrieval) runSearch({ askAgent: Boolean(state.agentEndpoint) });
+      else askLiveAgent();
     });
     elements.chips.append(button);
   }
+}
+
+function startControlWatcher() {
+  setInterval(() => {
+    const selectedProfile = elements.knowledgeBase?.value;
+    if (
+      selectedProfile &&
+      selectedProfile !== state.profile &&
+      selectedProfile !== state.pendingProfile
+    ) {
+      state.pendingProfile = selectedProfile;
+      loadKnowledgeBase(selectedProfile).finally(() => {
+        state.pendingProfile = "";
+      });
+      return;
+    }
+
+    const selectedQaModel = elements.qaModel?.value;
+    if (selectedQaModel && selectedQaModel !== state.qaModel) {
+      state.qaModel = selectedQaModel;
+      renderAgentIdle();
+      if (currentKnowledgeBase().staticRetrieval) runSearch();
+      else renderAgentOnlyProfile();
+    }
+  }, 300);
+}
+
+async function loadKnowledgeBase(profile, options = {}) {
+  const config = knowledgeBases[profile] || knowledgeBases.ifrs17;
+  state.profile = config.profile;
+  state.query = config.defaultQuery;
+  state.latestResult = null;
+  elements.knowledgeBase.value = state.profile;
+  elements.input.value = state.query;
+  renderChips();
+  renderAgentIdle();
+
+  if (!config.staticRetrieval) {
+    state.data = null;
+    state.index = null;
+    renderAgentOnlyProfile();
+    if (options.askAgent) askLiveAgent();
+    return;
+  }
+
+  elements.dataStatus.textContent = `${config.label} profile loading...`;
+  elements.dataMeta.textContent = "Static GitHub Pages build";
+  const response = await fetch(config.dataUrl);
+  state.data = await response.json();
+  state.index = buildSearchIndex(state.data.chunks);
+  elements.dataStatus.textContent = `${config.label} profile loaded`;
+  elements.dataMeta.textContent = `${state.data.meta.chunk_count} chunks · ${state.data.meta.alias_count} aliases · ${state.data.meta.graph_relation_count} graph relations`;
+  runSearch({ askAgent: options.askAgent });
+}
+
+function currentKnowledgeBase() {
+  return knowledgeBases[state.profile] || knowledgeBases.ifrs17;
+}
+
+function selectedModel() {
+  state.qaModel = elements.qaModel?.value || state.qaModel;
+  return qaModels[state.qaModel] || qaModels["ollama:qwen2.5:7b"];
+}
+
+function renderAgentOnlyProfile() {
+  const config = currentKnowledgeBase();
+  elements.dataStatus.textContent = `${config.label} profile selected`;
+  elements.dataMeta.textContent = "Agent endpoint required · static public corpus not bundled";
+  elements.resultTitle.textContent = `${config.label} requires an Agent endpoint`;
+  elements.confidence.textContent = "Agent-only";
+  elements.confidence.className = "confidence confidence-medium";
+  elements.metrics.innerHTML = "";
+  for (const [label, value] of [
+    ["Knowledge base", config.label],
+    ["QA LLM", selectedModel().label],
+    ["Static retrieval", "Unavailable in public demo"],
+    ["Agent payload profile", config.profile],
+  ]) {
+    const item = document.createElement("div");
+    item.className = "metric";
+    item.innerHTML = `<span>${label}</span><strong>${escapeHtml(String(value))}</strong>`;
+    elements.metrics.append(item);
+  }
+  renderVariantDetails(state.variant);
+  elements.answer.innerHTML = `
+    <div class="answer-head">
+      <div>
+        <p class="eyebrow">Knowledge base</p>
+        <h3>${escapeHtml(config.label)} Agent profile</h3>
+      </div>
+      <span>agent-only</span>
+    </div>
+    <p>${escapeHtml("公開 GitHub Pages 不打包三體全文。設定 Agent endpoint 後，前端會把 profile 和 QA LLM 一起送到後端，由後端檢索對應 KB 並回答。")}</p>
+  `;
+  elements.comparison.hidden = true;
+  elements.comparison.innerHTML = "";
+  elements.results.innerHTML =
+    '<div class="empty">This knowledge base is available through the Agent endpoint. Static browser-side retrieval is disabled for this profile.</div>';
+  elements.graphPanel.innerHTML = `
+    <div class="graph-block">
+      <h3>Agent profile</h3>
+      <p>${escapeHtml(config.profile)}</p>
+    </div>
+  `;
+  renderPipeline({
+    pipeline: [
+      { name: "Knowledge Base", detail: `${config.label} selected by the user.` },
+      { name: "QA Agent LLM", detail: selectedModel().label },
+      { name: "Agent Endpoint", detail: "Backend performs retrieval and generation for this profile." },
+    ],
+  });
 }
 
 function runSearch(options = {}) {
@@ -142,7 +302,7 @@ async function askLiveAgent(result) {
     renderAgentMessage({
       status: "offline",
       title: "Live Agent 未連線",
-      message: "設定 Agent endpoint 後，這裡會呼叫後端 Agent 重新檢索 IFRS17 KB 並生成回答。",
+      message: `設定 Agent endpoint 後，會用 ${currentKnowledgeBase().label} KB 和 ${selectedModel().label} 重新檢索並回答。`,
     });
     return;
   }
@@ -152,14 +312,16 @@ async function askLiveAgent(result) {
   renderAgentMessage({
     status: "pending",
     title: "Live Agent 正在回答",
-    message: "Agent API 正在執行 IFRS17 retrieval，並把 evidence 交給開源模型回答。",
+    message: `Agent API 正在執行 ${currentKnowledgeBase().label} retrieval，並把 evidence 交給 ${selectedModel().label} 回答。`,
   });
 
   try {
     const payload = buildAgentQueryPayload({
-      question: result.query,
-      variant: result.variant,
-      topK: result.contexts.length || 8,
+      question: result?.query || state.query,
+      profile: state.profile,
+      model: selectedModel(),
+      variant: result?.variant || state.variant,
+      topK: result?.contexts?.length || 8,
     });
     const response = await callAgentEndpoint(state.agentEndpoint, payload);
     if (requestId !== state.agentRequestId) return;
@@ -182,6 +344,8 @@ function renderMetrics(result, expanded) {
   elements.confidence.className = `confidence confidence-${result.confidence}`;
   elements.metrics.innerHTML = "";
   const metrics = [
+    ["Knowledge base", currentKnowledgeBase().label],
+    ["QA LLM", selectedModel().label],
     ["Variant", labelForVariant(result.variant)],
     ["Contexts", result.contexts.length],
     ["Total time", `${result.timings.totalMs.toFixed(2)} ms`],
@@ -246,7 +410,7 @@ function renderAgentIdle() {
     status: state.agentEndpoint ? "ready" : "offline",
     title: state.agentEndpoint ? "Live Agent 已設定" : "Live Agent 未連線",
     message: state.agentEndpoint
-      ? "按下 Ask Agent 會呼叫 endpoint，由後端 Agent 重新檢索 IFRS17 KB 並生成中文回答。"
+      ? `按下 Ask Agent 會呼叫 endpoint，由後端 Agent 檢索 ${currentKnowledgeBase().label} KB，並使用 ${selectedModel().label} 生成中文回答。`
       : "這個區塊只在設定 Agent endpoint 後呼叫模型；未設定時不會用模板回答冒充 Agent。",
   });
 }

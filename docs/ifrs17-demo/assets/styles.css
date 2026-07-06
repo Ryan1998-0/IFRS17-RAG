@@ -24,7 +24,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -112,6 +113,7 @@ h3 {
 
 .search-form label,
 .agent-controls label,
+.control-field label,
 .variant-group legend {
   display: block;
   margin-bottom: 8px;
@@ -121,9 +123,14 @@ h3 {
 }
 
 .search-row,
-.agent-row {
+.agent-row,
+.profile-controls {
   display: grid;
   gap: 10px;
+}
+
+.profile-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .search-row {
@@ -135,12 +142,14 @@ h3 {
 }
 
 .search-row input,
-.agent-row input {
+.agent-row input,
+.control-field select {
   width: 100%;
   min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0 14px;
+  background: #fff;
 }
 
 .search-row button,
@@ -597,7 +606,8 @@ mark {
   }
 
   .search-row,
-  .agent-row {
+  .agent-row,
+  .profile-controls {
     grid-template-columns: 1fr;
   }
 
