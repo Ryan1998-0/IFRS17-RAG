@@ -6,6 +6,8 @@ Retrieval-only RAG benchmark for IFRS 17 materials. The project compares four re
 
 完整中文專案整理: [docs/project_overview_zh.md](docs/project_overview_zh.md)
 
+Interview code-question submission note: [SUBMISSION.md](SUBMISSION.md)
+
 - BM25-only
 - BM25 + Dense
 - BM25 + Dense + Graph

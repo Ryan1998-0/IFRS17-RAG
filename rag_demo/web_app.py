@@ -4,6 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 
 from rag_demo.config import RagConfig
+from rag_demo.knowledge_base import active_knowledge_base
 from rag_demo.query import answer_question_v2
 
 
@@ -17,15 +18,17 @@ def render_home(
     top_k: int = None,
 ) -> str:
     config = RagConfig.from_env()
+    knowledge_base = active_knowledge_base()
     top_k = top_k or config.top_k
     escaped_question = html.escape(question)
     escaped_model = html.escape(model)
+    escaped_profile = html.escape(knowledge_base.name)
     return f"""<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>三體 RAG V2</title>
+  <title>RAG Agent Demo</title>
   <style>
     :root {{
       color-scheme: light;
@@ -213,8 +216,8 @@ def render_home(
 <body>
   <header>
     <div class="wrap top">
-      <h1>三體 RAG V2</h1>
-      <div class="badge">Knowledge Base: 三體三部曲 / Model: {escaped_model}</div>
+      <h1>RAG Agent Demo</h1>
+      <div class="badge">Knowledge Base: {escaped_profile} / Model: {escaped_model}</div>
     </div>
   </header>
   <main class="wrap">
@@ -222,7 +225,7 @@ def render_home(
       <section>
         <h2>提問</h2>
         <form method="post" action="/ask" id="ask-form">
-          <label for="question">《三體》問題</label>
+          <label for="question">問題</label>
           <textarea id="question" name="question" autofocus>{escaped_question}</textarea>
           <div class="field">
             <label for="model">模型</label>
@@ -245,9 +248,9 @@ def render_home(
           </button>
         </form>
         <div class="samples">
-          <button class="sample" type="button">第一代執劍者是誰？</button>
-          <button class="sample" type="button">冥王星上守護人類文明記憶的人是誰？</button>
-          <button class="sample" type="button">最終摧毀太陽系的降維武器叫什麼？</button>
+          <button class="sample" type="button">IFRS17 的目的是什麼？</button>
+          <button class="sample" type="button">IFRS17 適用哪些合約？</button>
+          <button class="sample" type="button">舊制 IFRS 4 和新制 IFRS 17 差在哪？</button>
         </div>
         <div class="warn">本機模型可能需要幾秒鐘；API 模型需要設定對應 API key。</div>
       </section>
